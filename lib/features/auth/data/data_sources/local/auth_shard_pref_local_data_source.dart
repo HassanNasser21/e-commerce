@@ -1,0 +1,27 @@
+import 'package:ecommerce/core/constants.dart';
+import 'package:ecommerce/core/errors/exceptions.dart';
+import 'package:ecommerce/features/auth/data/data_sources/local/auth_local_data_source.dart';
+import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+@Singleton(as: AuthLocalDataSource)
+class AuthShardPrefLocalDataSource implements AuthLocalDataSource {
+  final SharedPreferences sharedPreferences;
+  AuthShardPrefLocalDataSource(this.sharedPreferences);
+  @override
+  Future<void> saveToken(String token) async {
+    try {
+      await sharedPreferences.setString(CashConstants.tokenKey, token);
+    } catch (exception) {
+      throw const LocalException('faild to save token');
+    }
+  }
+
+  @override
+  Future<String> getToken() async {
+    try {
+      return sharedPreferences.getString(CashConstants.tokenKey)!;
+    } catch (exception) {
+      throw const LocalException('faild to get token');
+    }
+  }
+}

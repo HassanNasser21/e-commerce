@@ -4,10 +4,15 @@ import 'package:ecommerce/core/resources/font_manager.dart';
 import 'package:ecommerce/core/resources/styles_manager.dart';
 import 'package:ecommerce/core/resources/values_manager.dart';
 import 'package:ecommerce/core/routes/routes.dart';
+import 'package:ecommerce/core/utils/ui_utils.dart';
 import 'package:ecommerce/core/utils/validator.dart';
 import 'package:ecommerce/core/widgets/custom_elevated_button.dart';
 import 'package:ecommerce/core/widgets/custom_text_field.dart';
+import 'package:ecommerce/features/auth/data/models/register_request.dart';
+import 'package:ecommerce/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:ecommerce/features/auth/presentation/cubit/auth_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -38,13 +43,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    height: Sizes.s40.h,
-                  ),
+                  SizedBox(height: Sizes.s40.h),
                   Center(child: SvgPicture.asset(SvgAssets.route)),
-                  SizedBox(
-                    height: Sizes.s40.h,
-                  ),
+                  SizedBox(height: Sizes.s40.h),
                   CustomTextField(
                     backgroundColor: ColorManager.white,
                     hint: 'enter your full name',
@@ -53,9 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     validation: Validator.validateFullName,
                     controller: _nameController,
                   ),
-                  SizedBox(
-                    height: Sizes.s18.h,
-                  ),
+                  SizedBox(height: Sizes.s18.h),
                   CustomTextField(
                     hint: 'enter your mobile no.',
                     backgroundColor: ColorManager.white,
@@ -64,9 +63,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     textInputType: TextInputType.phone,
                     controller: _phoneController,
                   ),
-                  SizedBox(
-                    height: Sizes.s18.h,
-                  ),
+                  SizedBox(height: Sizes.s18.h),
                   CustomTextField(
                     hint: 'enter your email address',
                     backgroundColor: ColorManager.white,
@@ -75,9 +72,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     textInputType: TextInputType.emailAddress,
                     controller: _emailController,
                   ),
-                  SizedBox(
-                    height: Sizes.s18.h,
-                  ),
+                  SizedBox(height: Sizes.s18.h),
                   CustomTextField(
                     hint: 'enter your password',
                     backgroundColor: ColorManager.white,
@@ -87,48 +82,67 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     textInputType: TextInputType.text,
                     controller: _passwordController,
                   ),
-                  SizedBox(
-                    height: Sizes.s50.h,
-                  ),
+                  SizedBox(height: Sizes.s50.h),
                   Center(
                     child: SizedBox(
                       height: Sizes.s60.h,
                       width: MediaQuery.sizeOf(context).width * .9,
-                      child: CustomElevatedButton(
-                        label: 'Register',
-                        backgroundColor: ColorManager.white,
-                        isStadiumBorder: false,
-                        textStyle: getBoldStyle(
-                          color: ColorManager.primary,
-                          fontSize: FontSize.s20,
-                        ),
-                        onTap: () {
-                          if (_formKey.currentState!.validate()) {}
+                      child: BlocListener<AuthCubit,AuthState>(
+                        listener: (context, state) {
+                          if(state is RegisterLoading){
+                            UIUtils.showLoading(context);
+                          }else if(state is RegisterSuccess){
+                            UIUtils.hideLoading(context);
+                            Navigator.of(context).pushReplacementNamed(Routes.home);
+                          }else if (state is RegisterError){
+                            UIUtils.hideLoading(context);
+                            UIUtils.showMessage(state.message);
+                          }
                         },
+                        child: CustomElevatedButton(
+                          label: 'Register',
+                          backgroundColor: ColorManager.white,
+                          isStadiumBorder: false,
+                          textStyle: getBoldStyle(
+                            color: ColorManager.primary,
+                            fontSize: FontSize.s20,
+                          ),
+                          onTap: () {
+                            if (_formKey.currentState!.validate()) {
+                              context.read<AuthCubit>().registr(
+                                RegisterRequest(
+                                  email: _emailController.text,
+                                  password: _passwordController.text,
+                                  name: _nameController.text,
+                                  phone: _phoneController.text,
+                                ),
+                              );
+                            }
+                          },
+                        ),
                       ),
                     ),
                   ),
-                  SizedBox(
-                    height: 30.h,
-                  ),
+                  SizedBox(height: 30.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'Already have an account?',
-                        style: getSemiBoldStyle(color: ColorManager.white)
-                            .copyWith(fontSize: FontSize.s16),
+                        style: getSemiBoldStyle(
+                          color: ColorManager.white,
+                        ).copyWith(fontSize: FontSize.s16),
                       ),
-                      SizedBox(
-                        width: Sizes.s8.w,
-                      ),
+                      SizedBox(width: Sizes.s8.w),
                       GestureDetector(
-                        onTap: () => Navigator.of(context)
-                            .pushReplacementNamed(Routes.login),
+                        onTap: () => Navigator.of(
+                          context,
+                        ).pushReplacementNamed(Routes.login),
                         child: Text(
                           'Login',
-                          style: getSemiBoldStyle(color: ColorManager.white)
-                              .copyWith(fontSize: FontSize.s16),
+                          style: getSemiBoldStyle(
+                            color: ColorManager.white,
+                          ).copyWith(fontSize: FontSize.s16),
                         ),
                       ),
                     ],
