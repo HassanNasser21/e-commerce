@@ -8,10 +8,11 @@ import 'package:ecommerce/features/auth/data/models/register_request.dart';
 import 'package:ecommerce/features/auth/data/models/register_response.dart';
 import 'package:flutter/material.dart';
 import 'package:injectable/injectable.dart';
+
 @Singleton(as: AuthRemoteDataSource)
 class AuthApiRemoteDataSource implements AuthRemoteDataSource {
   final Dio dio;
-  AuthApiRemoteDataSource(this.dio); 
+  AuthApiRemoteDataSource(this.dio);
   @override
   Future<RegisterResponse> register(RegisterRequest request) async {
     try {

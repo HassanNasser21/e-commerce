@@ -87,14 +87,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: SizedBox(
                       height: Sizes.s60.h,
                       width: MediaQuery.sizeOf(context).width * .9,
-                      child: BlocListener<AuthCubit,AuthState>(
+                      child: BlocListener<AuthCubit, AuthState>(
                         listener: (context, state) {
-                          if(state is RegisterLoading){
+                          if (state is RegisterLoading) {
                             UIUtils.showLoading(context);
-                          }else if(state is RegisterSuccess){
+                          } else if (state is RegisterSuccess) {
                             UIUtils.hideLoading(context);
-                            Navigator.of(context).pushReplacementNamed(Routes.home);
-                          }else if (state is RegisterError){
+                            Navigator.of(
+                              context,
+                            ).pushReplacementNamed(Routes.home);
+                          } else if (state is RegisterError) {
                             UIUtils.hideLoading(context);
                             UIUtils.showMessage(state.message);
                           }

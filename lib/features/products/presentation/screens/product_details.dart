@@ -1,14 +1,19 @@
+import 'package:ecommerce/core/dependency_injection/service_locator.dart';
 import 'package:ecommerce/core/resources/assets_manager.dart';
 import 'package:ecommerce/core/resources/color_manager.dart';
 import 'package:ecommerce/core/resources/styles_manager.dart';
 import 'package:ecommerce/core/widgets/custom_elevated_button.dart';
 import 'package:ecommerce/core/widgets/product_counter.dart';
+import 'package:ecommerce/features/products/domain/entities/product.dart';
+import 'package:ecommerce/features/products/presentation/cubit/products_cubit.dart';
+import 'package:ecommerce/features/products/presentation/cubit/products_state.dart';
 import 'package:ecommerce/features/products/presentation/widgets/product_description.dart';
 import 'package:ecommerce/features/products/presentation/widgets/product_image.dart';
 import 'package:ecommerce/features/products/presentation/widgets/product_label.dart';
 import 'package:ecommerce/features/products/presentation/widgets/product_rating.dart';
 import 'package:ecommerce/features/products/presentation/widgets/product_slider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ProductDetails extends StatefulWidget {
@@ -19,17 +24,19 @@ class ProductDetails extends StatefulWidget {
 }
 
 class _ProductDetailsState extends State<ProductDetails> {
-  int _quantity = 1;
+  final _productQuantity = serviceLocator.get<ProductsCubit>();
 
   @override
   Widget build(BuildContext context) {
+    final product = ModalRoute.of(context)!.settings.arguments as Product;
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         title: Text(
           'Product Details',
-          style: getMediumStyle(color: ColorManager.appBarTitle)
-              .copyWith(fontSize: 20.sp),
+          style: getMediumStyle(
+            color: ColorManager.appBarTitle,
+          ).copyWith(fontSize: 20.sp),
         ),
         actions: [
           IconButton(
@@ -59,55 +66,36 @@ class _ProductDetailsState extends State<ProductDetails> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ProductSlider(
-                items: [
-                  'https://pl.kicksmaniac.com/zdjecia/2022/08/23/508/43/NIKE_AIR_JORDAN_1_RETRO_HIGH_GS_RARE_AIR_MAX_ORANGE-mini.jpg',
-                  'https://pl.kicksmaniac.com/zdjecia/2022/08/23/508/43/NIKE_AIR_JORDAN_1_RETRO_HIGH_GS_RARE_AIR_MAX_ORANGE-mini.jpg',
-                ]
-                    .map(
-                      (imageURL) => ProductImage(imageUrl: imageURL),
-                    )
+                items: product.images
+                    .map((imageURL) => ProductImage(imageUrl: imageURL))
                     .toList(),
                 initialIndex: 0,
               ),
-              SizedBox(
-                height: 24.h,
+              SizedBox(height: 24.h),
+              ProductLabel(
+                name: product.title,
+                price: 'EGP ${product.priceAfterDiscount ?? product.price}',
               ),
-              const ProductLabel(
-                name: 'Nike Air Jordon Nike shoes flexible for wo..',
-                price: 'EGP 399',
-              ),
-              SizedBox(
-                height: 16.h,
-              ),
+              SizedBox(height: 16.h),
               Row(
                 children: [
-                  const Expanded(
+                  Expanded(
                     child: ProductRating(
-                      buyers: '1324',
-                      rating: '4.8 (853)',
+                      buyers: '${product.sold}',
+                      rating:
+                          '${product.ratingsAverage} (${product.ratingsQuantity})',
                     ),
                   ),
                   ProductCounter(
-                    initialValue: _quantity,
-                    onIncrement: (value) {
-                      _quantity = value;
-                    },
-                    onDecrement: (value) {
-                      _quantity = value;
-                    },
+                    initialValue: _productQuantity.ProductQuantity,
+                    onIncrement: _productQuantity.changeProductQuantity,
+                    onDecrement: _productQuantity.changeProductQuantity,
                   ),
                 ],
               ),
-              SizedBox(
-                height: 16.h,
-              ),
-              const ProductDescription(
-                description:
-                    'Nike is a multinational corporation that designs, develops, and sells athletic footwear ,apparel, and accessories.',
-              ),
-              SizedBox(
-                height: 48.h,
-              ),
+              SizedBox(height: 16.h),
+              ProductDescription(description: product.description),
+              SizedBox(height: 48.h),
               Row(
                 children: [
                   Column(
@@ -118,20 +106,23 @@ class _ProductDetailsState extends State<ProductDetails> {
                           color: ColorManager.primary.withOpacity(.6),
                         ).copyWith(fontSize: 18.sp),
                       ),
-                      SizedBox(
-                        height: 12.h,
-                      ),
-                      Text(
-                        'EGP 399',
-                        style: getMediumStyle(
-                          color: ColorManager.appBarTitle,
-                        ).copyWith(fontSize: 18.sp),
+                      SizedBox(height: 12.h),
+                      BlocProvider(
+                        create: (_) => _productQuantity,
+                        child: BlocBuilder<ProductsCubit, ProductsState>(
+                          builder: (context, state) {
+                            return Text(
+                              'EGP ${_productQuantity.ProductQuantity * (product.priceAfterDiscount ?? product.price)}',
+                              style: getMediumStyle(
+                                color: ColorManager.appBarTitle,
+                              ).copyWith(fontSize: 18.sp),
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
-                  SizedBox(
-                    width: 33.w,
-                  ),
+                  SizedBox(width: 33.w),
                   Expanded(
                     child: CustomElevatedButton(
                       label: 'Add to cart',

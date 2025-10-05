@@ -4,6 +4,7 @@ import 'package:ecommerce/features/auth/data/models/login_request.dart';
 import 'package:ecommerce/features/auth/domain/entities/user.dart';
 import 'package:ecommerce/features/auth/domain/repositories/auth_repository.dart';
 import 'package:injectable/injectable.dart';
+
 @singleton
 class Login {
   final AuthRepository _authRepository;

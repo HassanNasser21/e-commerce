@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class Category extends Equatable{
+class Category extends Equatable {
   final String id;
   final String name;
   final String imageUrl;
@@ -10,7 +10,7 @@ class Category extends Equatable{
     required this.name,
     required this.imageUrl,
   });
-  
+
   @override
   List<Object?> get props => [id];
 }

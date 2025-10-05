@@ -1,4 +1,5 @@
 import 'package:ecommerce/features/auth/data/models/user_model.dart';
+
 class RegisterResponse {
   final String message;
   final UserModel user;
